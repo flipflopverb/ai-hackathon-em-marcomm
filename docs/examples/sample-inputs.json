@@ -1,0 +1,10 @@
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "answers": [
+    { "question_id": "q1", "option_id": "a2" },
+    { "question_id": "q2", "option_id": "b1" },
+    { "question_id": "q3", "option_id": "c3" }
+  ],
+  "branch_selection": "engineering_technology"
+}
+

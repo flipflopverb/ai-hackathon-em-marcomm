@@ -1,0 +1,4 @@
+interface:
+  display_name: "UofU Enrollment Branding"
+  short_description: "UofU enrollment campaign design and copy"
+  default_prompt: "Use this skill to produce enrollment campaign copy and design direction aligned to University of Utah strategy guidelines."

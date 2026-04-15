@@ -1,98 +1,103 @@
 # Branded Student Discovery Game for University Marketing
 
-## Summary
-Build a fast, branded “student discovery” experience for prospective undergrads that takes 2 to 5 minutes and outputs both a personalization profile and CRM-friendly lead insight.
+## 1) Product Goal and v1 Scope
 
-Recommended v1 concept: **Topographical Swoop**
-Swoop travels across a stylized Utah map/campus landscape. Each stop presents a quick choice, micro-challenge, or preference prompt. The route the student chooses becomes the quiz, so it feels like exploration rather than form-filling.
+Build a 2-5 minute branded discovery game that feels like a campus/city/student-life tour, not a form.
 
-Keep **Block U Builder** as a secondary concept if the team later wants a simpler fallback or event activation version.
+The game must produce two outcomes:
+- `profile` (motivation type)
+- `academic_interest` (college/field interest)
 
-## Key Changes
-### Core game concept
-- Use a map/exploration loop with 5 to 7 short decision points.
-- Each stop represents a meaningful college dimension: academics, campus life, support, career goals, challenge level, community, and environment.
-- Interactions should be lightweight: pick-a-path, swipe/select cards, one-tap tradeoff choices, or short drag/drop moments.
-- End with a named profile, a short “about you” summary, and personalized content modules.
+v1 uses one shared game flow with a college exploration branch:
+- Tour choices across campus-life themes drive `profile`
+- College branch selection sets `academic_interest`
 
-### Recommended game ideas to consider
-- **Topographical Swoop**
-  Swoop navigates to locations like “Summit of Ambition,” “Trail of Belonging,” or “Career Canyon.” Each choice reveals student priorities while reinforcing Utah/campus branding.
-- **Build Your Route**
-  Students choose their own ideal route across campus-style landmarks. The order and selections shape the profile. This is the cleanest variant of the Swoop concept.
-- **Block U Builder**
-  Each answer adds a branded block to the U. The final structure visually reflects the student’s priorities. Best if the team wants a simpler mechanic with stronger logo integration.
-- **Hybrid**
-  Use the topographical map as the journey and the Block U as the end-state results animation. This gives the strongest brand payoff if design capacity allows.
+After results, hand off to embedded Slate RFI and collect: `first`, `last`, `email`, `school`, `campus`, `contact_type`, `birthdate`.
 
-### Recommended profile model
-Use a **hybrid motivation + interest** system with one primary profile and one secondary academic leaning.
+Pass game metadata to Slate hidden fields via query parameters. Do not build separate in-state/out-of-state game versions in v1.
 
-Primary motivational profiles:
-- **The Explorer**
-  Wants breadth, discovery, flexibility, and new experiences.
-- **The Achiever**
-  Motivated by ambition, challenge, prestige, and high performance.
-- **The Builder**
-  Focused on practical outcomes, careers, internships, and real-world readiness.
-- **The Connector**
-  Values belonging, collaboration, community, and student life.
-- **The Changemaker**
-  Driven by purpose, impact, service, and solving meaningful problems.
+## 2) Non-Goals and v1 Boundaries
 
-Secondary interest lens:
-- Health and helping fields
-- Business and leadership
-- Engineering and technology
-- Arts and creativity
-- Science and research
-- Humanities and society
+- Two separate game experiences for in-state and out-of-state audiences.
+- Deep adaptive branching that rewrites the whole journey from early answers.
+- Full custom content for every profile x interest combination.
+- In-game contact form collection.
+- PII in query parameters.
+- Full program-level college depth at launch.
+- Downstream CRM automation/routing implementation.
 
-Result format:
-- Show 1 primary motivation profile
-- Show 1 secondary academic-interest tag
-- Optionally show a short “You thrive where…” statement for personalization logic
+## 3) Canonical User Journey
 
-### Personalization outputs
-After results, dynamically tailor:
-- Featured programs and majors
-- Student stories/testimonials
-- Campus-life highlights
-- Suggested next actions such as visit, apply, talk to admissions, explore scholarships
+- Student enters from campaign/site source.
+- Student completes a unified campus/city/student-life tour (5-7 decisions).
+- Student selects a college exploration branch to set `academic_interest`.
+- Game computes and displays `profile + academic_interest`.
+- Student proceeds to embedded Slate RFI form.
+- Game passes non-PII metadata to Slate hidden fields.
 
-CRM/export fields:
-- Primary profile
-- Secondary interest tag
-- Top 2 motivation signals
-- Intended start term if collected
-- Lead source and completion timestamp
+## 4) Data Contracts
 
-### Public interfaces and content model
-Define these content/data objects before implementation:
-- `Question`: prompt, interaction type, answer options, scoring weights
-- `Profile`: id, label, short description, personalized messaging
-- `InterestTag`: id, label
-- `ContentMapping`: profile or profile+interest to programs, stories, campus-life modules, CTA set
-- `LeadPayload`: contact fields plus result metadata
+Define these objects before implementation to keep gameplay, personalization, and handoff aligned.
 
-Scoring defaults:
-- Every answer contributes weighted points to 1 or more motivation profiles
-- Some answers also increment interest tags
-- Final result chooses highest motivation score plus top interest tag
-- Tie-break with either latest high-confidence answer or predetermined priority order
+- `Question`
+  - Required: `id`, `prompt`, `interaction_type`, `options[]`, `profile_weights`, `order`
+  - Optional: `interest_weights`, `pillar_tags`, `confidence_weight`
+- `Profile`
+  - Required: `id`, `label`, `short_summary`
+  - Optional: `result_headline`, `result_body`, `cta_set_id`
+- `InterestTag`
+  - Required: `id`, `label`, `college_group`
+  - Optional: `description`, `learn_more_url`
+- `ContentMapping`
+  - Required: `profile_id`, `interest_tag_id`, `message_modules[]`, `cta_modules[]`
+  - Optional: audience-specific copy variants
+- `GameOutputContract`
+  - Required: `game_profile`, `game_interest`, `game_version`, `game_session_id`, `game_completed_at`
+  - Optional: `game_top_signals`, `game_predicted_segment`, `game_confidence`
+- `LeadPayload` (conceptual final Slate record)
+  - Required visible fields: `first`, `last`, `email`, `school`, `campus`, `contact_type`, `birthdate`
+  - Required hidden fields: `game_profile`, `game_interest`, `game_version`, `game_session_id`, `game_completed_at`
 
-## Test Plan
-- Student can complete the full experience in under 5 minutes on mobile.
-- Result feels accurate and non-corny across all 5 primary profiles.
-- Every profile has distinct personalized programs, stories, campus-life content, and CTA modules.
-- Scoring produces balanced distribution across profiles in sample test runs.
-- CRM payload captures result fields correctly and consistently.
-- If a student skips a question or abandons mid-flow, the experience still exits gracefully without broken personalization.
-- Accessibility check: keyboard navigation, color contrast, motion reduction, readable touch targets.
+## 5) CRM Handoff Boundary (Slate)
 
-## Assumptions
-- v1 targets prospective undergraduate students only.
-- The first launch should prioritize website personalization and recruiter follow-up equally.
-- The team wants strong University of Utah branding, with Swoop and topographical/campus visual language leading the experience.
-- The team is comfortable with 5 primary profiles; this is enough for personalization without making results feel too generic or too granular.
-- Personalized content will be modular and mapped by profile rather than fully custom-written per individual student.
+- The game scope ends at Slate RFI submission.
+- Required hidden fields from game: `game_profile`, `game_interest`.
+- Optional hidden metadata: `game_version`, `game_session_id`, `game_completed_at`, `game_top_signals`.
+- Segmentation, routing, and downstream enrollment logic are owned by Slate/CRM (out of scope here).
+
+## 6) Personalization Rules (In-Product Only)
+
+- Personalization is limited to result presentation and handoff metadata.
+- The game must compute and display `profile` and `academic_interest`.
+- Results use predefined mapping keyed by `profile + academic_interest`.
+- Keep modules concise: headline, short copy, and next-step CTA.
+- No CRM routing or downstream communication logic in-game.
+
+## 7) Slate Integration Contract
+
+- Final step is embedded Slate RFI form submission.
+- Required hidden fields: `game_profile`, `game_interest`.
+- Optional hidden metadata: `game_version`, `game_session_id`, `game_completed_at`, `game_top_signals`.
+- Student-entered Slate fields: `first`, `last`, `email`, `school`, `campus`, `contact_type`, `birthdate`.
+- Field definitions and enums live in `slate/field-dictionary.md`.
+
+## 8) Measurement and QA (Game + Handoff Only)
+
+- Median completion time is 2-5 minutes on mobile.
+- Every completed run outputs `profile` and `academic_interest`.
+- Required hidden handoff fields reach Slate correctly.
+- Optional metadata fields pass when available.
+- No PII appears in query parameters.
+- Incomplete/abandoned sessions fail gracefully.
+- Accessibility baseline passes: keyboard navigation, contrast, reduced motion support, touch target usability.
+
+## 9) Delivery Phase (Current)
+
+Only Phase 0 is in scope.
+
+- **Phase 0: Planning and Contracts**
+  - Finalize this plan structure and scope.
+  - Finalize data contracts for gameplay and handoff.
+  - Finalize Slate field dictionary and hidden-field mapping in `slate/field-dictionary.md`.
+
+Phases for implementation, personalization expansion, and launch execution are intentionally deferred.
