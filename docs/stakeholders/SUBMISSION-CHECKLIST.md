@@ -2,7 +2,7 @@
 title: SUBMISSION-CHECKLIST
 owner: team
 status: draft
-last_updated: 2026-04-15
+last_updated: 2026-04-17
 source_of_truth: false
 ---
 
@@ -19,18 +19,20 @@ Track required materials before final hackathon submission.
 ## Outputs
 - Ready-to-submit package checklist.
 
-## Constraints
-- Keep submission artifacts aligned with repo state and demo behavior.
-
-## Examples
-- Include repo URL + concise summary + demo evidence package.
-
 ## Checklist
-- [ ] Final repo URL confirmed
-- [ ] Demo recording ready
+
+- [ ] Final GitHub repository URL confirmed
+- [ ] Live GitHub Pages URL confirmed
+- [ ] Demo path tested on the deployed build
 - [ ] Project summary finalized
 - [ ] Team member list confirmed
-- [ ] Supporting assets/references linked
+- [ ] Demo recording or screenshots prepared if required
+- [ ] Credits or asset/tool attributions prepared if required
+- [ ] Supporting references linked where helpful
+
+## Constraints
+- Keep submission artifacts aligned with the deployed demo behavior.
+- Do not describe features that are not actually present in the playable build.
 
 ## Open Questions
-- Are there any format/length constraints for submission fields?
+- Are there any final submission character limits, file limits, or media-format constraints?

@@ -4,71 +4,132 @@
 
 | Layer | Choice |
 | --- | --- |
-| Runtime | Browser-based 2D game |
-| Markup shell | HTML |
-| Styling/UI | CSS |
-| Logic | JavaScript modules |
-| Game rendering | Canvas-based scene rendering |
-| Content | Static JSON or JS data modules |
+| Game engine | Phaser 3 |
+| Build tool | Vite |
+| Language | JavaScript |
+| Map authoring | Tiled |
+| UI overlays | HTML + CSS |
+| Content/data | Static JSON or JS data modules |
 | Hosting | GitHub Pages |
-| Local dev | Lightweight local web server |
-| Build tool | None for v1 unless engine choice forces one |
+| Local dev | Vite dev server |
 
-The repo should now be prepared for a real map-driven game loop rather than a screen-by-screen survey flow.
+This project should use a real browser game stack, not a no-build static microsite stack.
 
-## Why This Direction
+## Why This Stack
 
-- Free movement is central to the concept, so the architecture should center map scenes, trigger zones, and exploration state.
-- A browser-based 2D stack keeps the prototype lightweight enough for hackathon speed.
-- Static content files are still a good fit for landmarks, interactions, items, and result mappings.
-- GitHub Pages remains viable if the prototype stays client-side.
+- `Phaser 3` gives the project the core game systems it actually needs: scenes, sprites, tilemaps, camera movement, collisions, input handling, animation, and asset loading.
+- `Vite` gives fast local development and a clean static production build that GitHub Pages can host.
+- `Tiled` is the fastest practical way to build a Pokemon-style campus map with walkable areas, collision layers, and landmark trigger zones.
+- HTML and CSS overlays are still useful for dialogue panels, HUD elements, result screens, and the Slate handoff UI.
+- Keeping the runtime fully client-side preserves GitHub Pages compatibility.
 
-## Runtime Structure
+## Why Not The Old Stack
+
+The previous “HTML + CSS + vanilla JS + no build step” approach was acceptable for a survey-like prototype, but it is the wrong default for a map-based exploration game.
+
+Problems with the old stack for this concept:
+- You would end up hand-building scene management, animation timing, movement, collision, and asset loading.
+- Map editing would be slower and less repeatable without a tilemap workflow.
+- Runtime complexity would still exist, just hidden inside ad hoc JavaScript instead of an engine built for it.
+
+## Runtime Architecture
+
+Recommended runtime structure:
 
 ```text
 /
-  index.html              # Game shell and bootstrapping
+  index.html
+  public/
   src/
-    game/                 # Loop, scenes, movement, collision, triggers
-    content/              # Map data, dialogues, items, interests, results
-    ui/                   # HUD, dialogue boxes, overlays, handoff screens
+    main.js
+    scenes/
+      BootScene.js
+      TitleScene.js
+      CampusScene.js
+      ResultsScene.js
+      HandoffScene.js
+    systems/
+      sessionState.js
+      academicInterest.js
+      swoopProgression.js
+      slatePayload.js
+    content/
+      mapScenes.js
+      locationTriggers.js
+      dialogueEvents.js
+      collectibleItems.js
+      academicInterests.js
+      resultMappings.js
+    ui/
+      hud.js
+      dialogueOverlay.js
+      resultOverlay.js
   assets/
-    maps/                 # Campus map art and collision layers
-    sprites/              # Player, Swoop, item, and landmark art
-    audio/                # Optional ambient and UI audio
+    maps/
+    sprites/
+    audio/
+    tilesets/
 ```
 
-## Gameplay Flow
+## Core Systems For v1
 
-The target loop is:
+The first playable slice should include:
 
-```text
-boot -> map exploration -> landmark interaction -> reward/progression -> results -> slate handoff
-```
-
-Core systems needed in v1:
-- Tile or grid-aware player movement
-- One campus map scene with collision boundaries
-- Trigger zones for 5-8 landmarks
-- Dialogue or prompt overlays for interactions
+- One campus map scene
+- Player movement on a tile-based or grid-aware map
+- Camera follow behavior
+- Collision boundaries
+- 5-8 landmark trigger zones
+- Short dialogue or prompt interactions
 - `Swoop` growth progression
 - Collectible tracking
 - `academic_interest` scoring
-- Final result screen
-- Optional Slate handoff screen
+- Result screen
+- Slate handoff CTA/screen
 
-## Data Files
+## Map Workflow
 
-Recommended content modules:
+Use `Tiled` for map production.
 
-- `map-scenes.json`: scene bounds, landmark positions, collision references
-- `location-triggers.json`: trigger metadata, linked dialogue, rewards, scoring
-- `dialogue-events.json`: short interaction content and choice outcomes
-- `collectible-items.json`: item metadata and unlock conditions
-- `academic-interests.json`: result IDs, labels, and destination copy
-- `result-mappings.json`: result modules keyed by `academic_interest`, `swoop_stage`, and items
+Recommended approach:
+- Create the campus map in Tiled
+- Define walkable and blocked layers
+- Define object layers for trigger zones and spawn points
+- Export the map as JSON
+- Load the exported map into Phaser
 
-## Slate RFI Handoff
+This will be much faster to iterate than hardcoding landmark positions and collision data by hand.
+
+## Data Approach
+
+Keep gameplay content data-driven where possible.
+
+Recommended modules:
+- `mapScenes`
+- `locationTriggers`
+- `dialogueEvents`
+- `collectibleItems`
+- `academicInterests`
+- `resultMappings`
+
+These can start as JS modules for speed, then move to JSON later if needed.
+
+## GitHub Pages Deployment
+
+This stack is compatible with GitHub Pages because the final build is static.
+
+Recommended deployment flow:
+- Run `vite build`
+- Deploy the generated `dist/` directory to GitHub Pages
+- Use a GitHub Actions workflow or `gh-pages` branch publishing
+
+Important config note:
+- Set Vite `base` correctly if the project is deployed as a GitHub Pages project site rather than a custom domain or user site.
+- Asset paths must be relative to the configured Vite base so sprites, maps, and tilesets load correctly in production.
+
+## Slate Handoff
+
+Slate remains a final handoff step, not the runtime core.
 
 If the player continues to Slate, the game should pass only:
 
@@ -83,7 +144,8 @@ No PII, `swoop_stage`, or collectible data should be passed via query parameters
 
 ## Next Steps
 
-1. Build the gameplay and content contracts.
-2. Implement a one-map vertical slice with movement and trigger zones.
-3. Add `Swoop` growth, collectibles, and result mapping.
-4. Add the final Slate handoff screen and query payload builder.
+1. Initialize the repo as a Vite app.
+2. Add Phaser runtime bootstrapping and scene structure.
+3. Create the first campus map in Tiled and export it as JSON.
+4. Wire movement, triggers, `Swoop` progression, and `academic_interest` scoring.
+5. Add the result screen and Slate payload builder.

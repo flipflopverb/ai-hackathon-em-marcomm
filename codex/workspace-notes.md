@@ -2,7 +2,7 @@
 title: WORKSPACE-NOTES
 owner: team
 status: draft
-last_updated: 2026-04-15
+last_updated: 2026-04-17
 source_of_truth: false
 ---
 
@@ -20,15 +20,14 @@ Capture practical notes for Codex-based collaboration in this repo.
 
 ## Notes
 
-- Use `CONTEXT.md` as primary nav entry for docs.
-- Keep canonical contract changes explicit and reviewed.
-- Prefer small, reviewable doc updates over large unstructured rewrites.
+- Use `CONTEXT.md` as the primary navigation entry for project docs.
+- Check `PLAN/stack.md` before proposing runtime architecture changes.
+- Keep gameplay and Slate contract changes explicit and reviewable.
+- Prefer small, testable edits over broad speculative rewrites.
+- Watch GitHub Pages base-path assumptions when touching asset paths or build config.
 
 ## Constraints
-- Notes here must not override canonical scope/contract files.
-
-## Examples
-- Note when a prompt pattern worked well for asset organization or contract checks.
+- Notes here must not override canonical scope, stack, or contract files.
 
 ## Open Questions
-- Should this file become a rolling changelog of Codex workflow learnings?
+- Should this file become a rolling log of implementation lessons once runtime code is active?

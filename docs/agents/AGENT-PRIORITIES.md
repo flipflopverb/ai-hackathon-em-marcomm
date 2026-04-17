@@ -2,7 +2,7 @@
 title: AGENT-PRIORITIES
 owner: team
 status: canonical
-last_updated: 2026-04-15
+last_updated: 2026-04-17
 source_of_truth: true
 ---
 
@@ -17,6 +17,7 @@ Define execution priority order for agent work when constraints or tradeoffs con
 - [docs/agents/AGENT-START-HERE.md](AGENT-START-HERE.md)
 - [docs/agents/AGENT-RULES.md](AGENT-RULES.md)
 - [PLAN/PLAN.md](../../PLAN/PLAN.md)
+- [docs/spec/DATA-CONTRACTS.md](../spec/DATA-CONTRACTS.md)
 - [slate/field-dictionary.md](../../slate/field-dictionary.md)
 
 ## Outputs
@@ -27,10 +28,10 @@ Define execution priority order for agent work when constraints or tradeoffs con
 ## Priority Order
 
 1. **Contract integrity**
-Ensure scope and handoff contracts remain valid.
+Keep gameplay scope, data contracts, and Slate payload definitions valid.
 
 2. **Data safety and privacy**
-Never introduce PII leakage or unsafe query-param behavior.
+Never introduce PII leakage or unsafe query-parameter behavior.
 
 3. **Canonical consistency**
 Keep all changes aligned with canonical sources and naming.
@@ -56,22 +57,21 @@ When priorities conflict:
 
 Example A:
 
-- Option 1: quick rename of handoff field for readability.
-- Option 2: keep current field and improve docs around it.
-- Decision: choose Option 2 (protect contract integrity).
+- Option 1: add extra gameplay metadata to the Slate payload for convenience.
+- Option 2: keep the minimal payload and preserve contract stability.
+- Decision: choose Option 2.
 
 Example B:
 
-- Option 1: broad refactor across many docs in one pass.
-- Option 2: small linked updates with verification after each.
-- Decision: choose Option 2 (maintainability + correctness).
+- Option 1: build a second map before the first loop is validated.
+- Option 2: finish one complete playable slice first.
+- Decision: choose Option 2.
 
 ## Constraints
 
-- Do not override `PLAN/PLAN.md` or `slate/field-dictionary.md` by implication.
+- Do not override canonical files by implication.
 - Do not optimize for speed at the expense of contract stability.
 
 ## Open Questions
 
-- Should priority #6 include explicit turnaround targets per task size?
 - Should we formalize “stop and request approval” triggers in a checklist format?
